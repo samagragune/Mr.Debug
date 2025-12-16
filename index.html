@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr.Debug - Learn Python with Friendly Error Explanations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inline-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .inline-controls label {
+            font-size: 0.95em;
+            color: #444;
+        }
+
+        .inline-controls input, .inline-controls textarea {
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        #stdinInput {
+            width: 100%;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        #timeoutInput {
+            width: 90px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-header h2 {
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        #codeInput {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        #codeInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #runButton {
+            margin-top: 15px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #runButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #runButton:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #runButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-header {
+            margin-bottom: 15px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        #outputSection {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+
+        #outputSection.hidden {
+            display: none;
+        }
+
+        #outputSection h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        #outputContent {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-left: 4px solid #28a745;
+        }
+
+        #errorSection {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 150px;
+        }
+
+        #errorSection.hidden {
+            display: none;
+        }
+
+        #errorSection h3 {
+            color: #e53e3e;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .error-summary {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e53e3e;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .error-why {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .error-why h4 {
+            color: #e53e3e;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .error-fix {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .error-fix h4 {
+            color: #e53e3e;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .error-fix ol {
+            margin-left: 20px;
+        }
+
+        .error-fix li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .placeholder {
+            color: #999;
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        /* --- Refreshed look & feel overrides --- */
+        :root {
+            --brand-1: #5b7bff;
+            --brand-2: #6f4ce5;
+            --accent: #22c55e;
+            --text: #0f172a;
+            --muted: #6b7280;
+            --surface: #ffffff;
+            --surface-muted: #f5f7fb;
+            --border: #e5e7eb;
+            --shadow: 0 18px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 15% 20%, rgba(91, 123, 255, 0.25), transparent 30%),
+                        radial-gradient(circle at 85% 10%, rgba(111, 76, 229, 0.25), transparent 30%),
+                        linear-gradient(135deg, #e8edff 0%, #f7f1ff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding-bottom: 26px;
+            border: 1px solid #eef1ff;
+            backdrop-filter: blur(6px);
+        }
+
+        .header {
+            padding: 34px;
+            border-bottom: 1px solid #eef1ff;
+            background: linear-gradient(135deg, rgba(91, 123, 255, 0.16), rgba(111, 76, 229, 0.16));
+        }
+
+        .header h1 {
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.05em;
+            color: #e7e9ff;
+        }
+
+        .main-content {
+            gap: 24px;
+            padding: 28px;
+        }
+
+        .editor-section,
+        .results-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .editor-header h2,
+        .results-header h2 {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        #codeInput,
+        #stdinInput {
+            background: var(--surface-muted);
+            border: 2px solid #e6e9f5;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #codeInput:focus,
+        #stdinInput:focus {
+            border-color: var(--brand-1);
+            box-shadow: 0 0 0 3px rgba(91, 123, 255, 0.18);
+        }
+
+        .inline-controls label {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        #runButton {
+            margin-top: 16px;
+            background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+            box-shadow: 0 12px 25px rgba(91, 123, 255, 0.35);
+        }
+
+        #runButton:hover:not(:disabled) {
+            box-shadow: 0 12px 30px rgba(91, 123, 255, 0.5);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            padding: 0 28px 12px 28px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .pill.ok {
+            background: #ecfdf3;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .pill.bad {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fecdd3;
+        }
+
+        .pill-secondary {
+            background: #f3f4ff;
+            border-color: #e0e7ff;
+            color: #4338ca;
+        }
+
+        #outputSection,
+        #errorSection {
+            border-radius: 14px;
+            border-width: 1px;
+        }
+
+        #outputContent,
+        .error-summary,
+        .error-why,
+        .error-fix {
+            border-radius: 10px;
+        }
+
+        .error-summary {
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .main-content {
+                padding: 18px;
+            }
+
+            .toolbar {
+                padding: 0 18px 10px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐛 Mr.Debug</h1>
+            <p>Learn Python with friendly error explanations</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="pill" id="backendStatus">Checking backend…</div>
+            <div class="pill pill-secondary">API: <span id="apiUrlText"></span></div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left: Code Editor -->
+            <div class="editor-section">
+                <div class="editor-header">
+                    <h2>✏️ Your Python Code</h2>
+                </div>
+                <textarea id="codeInput" placeholder="# Write your Python code here
+# For example:
+print('Hello, World!')
+
+# Try code with errors to see Mr.Debug help you fix them!
+# Example with error:
+# print(x)  # This will cause a NameError"></textarea>
+                <div class="inline-controls">
+                    <div style="flex: 1;">
+                        <label for="stdinInput">Program input (optional)</label>
+                        <textarea id="stdinInput" placeholder="Lines of input that your code reads with input()"></textarea>
+                    </div>
+                    <div>
+                        <label for="timeoutInput">Timeout (sec)</label><br>
+                        <input type="number" id="timeoutInput" min="1" max="60" value="10">
+                    </div>
+                </div>
+                <button id="runButton">▶️ Run Code</button>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h2>📊 Results</h2>
+                </div>
+
+                <!-- Output Section -->
+                <div id="outputSection" class="hidden">
+                    <h3>✅ Success!</h3>
+                    <div id="outputContent"></div>
+                </div>
+
+                <!-- Error Section -->
+                <div id="errorSection" class="hidden">
+                    <h3>❌ Oops! Let's fix this together</h3>
+                    <div class="error-summary" id="errorSummary"></div>
+                    <div class="error-why">
+                        <h4>🤔 Why did this happen?</h4>
+                        <p id="errorWhy"></p>
+                    </div>
+                    <div class="error-fix">
+                        <h4>🔧 How to fix it:</h4>
+                        <ol id="errorFixList"></ol>
+                    </div>
+                    <div class="confidence-badge" id="confidenceBadge"></div>
+                </div>
+
+                <!-- Placeholder when nothing has run yet -->
+                <div id="placeholder" class="placeholder">
+                    👈 Write some Python code and click "Run Code" to see the results here!
+                </div>
+
+                <!-- Loading state -->
+                <div id="loadingSection" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Running your code...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const codeInput = document.getElementById('codeInput');
+        const runButton = document.getElementById('runButton');
+        const stdinInput = document.getElementById('stdinInput');
+        const timeoutInput = document.getElementById('timeoutInput');
+        const outputSection = document.getElementById('outputSection');
+        const errorSection = document.getElementById('errorSection');
+        const placeholder = document.getElementById('placeholder');
+        const loadingSection = document.getElementById('loadingSection');
+        const outputContent = document.getElementById('outputContent');
+        const errorSummary = document.getElementById('errorSummary');
+        const errorWhy = document.getElementById('errorWhy');
+        const errorFixList = document.getElementById('errorFixList');
+        const confidenceBadge = document.getElementById('confidenceBadge');
+        const apiUrlText = document.getElementById('apiUrlText');
+        const backendStatus = document.getElementById('backendStatus');
+
+        // API endpoint (use same origin so it works on http/https and different hosts)
+        const API_URL = `${window.location.origin.replace(/\/$/, '')}/run`;
+        const HEALTH_URL = API_URL.endsWith('/run') ? API_URL.replace(/\/run$/, '/health') : `${API_URL}/health`;
+
+        if (apiUrlText) {
+            apiUrlText.textContent = API_URL;
+        }
+
+        function setBackendStatus(state, message) {
+            if (!backendStatus) return;
+            backendStatus.textContent = message;
+            backendStatus.classList.remove('ok', 'bad');
+            if (state === 'ok') backendStatus.classList.add('ok');
+            if (state === 'bad') backendStatus.classList.add('bad');
+        }
+
+        async function checkBackendHealth() {
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 3500);
+                const res = await fetch(HEALTH_URL, { signal: controller.signal });
+                clearTimeout(timer);
+                if (res.ok) {
+                    setBackendStatus('ok', 'Backend: Online');
+                } else {
+                    setBackendStatus('bad', 'Backend: Unreachable');
+                }
+            } catch (e) {
+                setBackendStatus('bad', 'Backend: Unreachable');
+            }
+        }
+
+        checkBackendHealth();
+
+        // Hide all result sections
+        function hideAllResults() {
+            outputSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+            placeholder.classList.add('hidden');
+            loadingSection.classList.add('hidden');
+        }
+
+        // Show loading state
+        function showLoading() {
+            hideAllResults();
+            loadingSection.classList.remove('hidden');
+            runButton.disabled = true;
+        }
+
+        // Show success output
+        function showSuccess(output) {
+            hideAllResults();
+            outputContent.textContent = output || '(no output)';
+            outputSection.classList.remove('hidden');
+            runButton.disabled = false;
+        }
+
+        // Show error with explanation
+        function showError(explanation) {
+            hideAllResults();
+            
+            // Set summary
+            errorSummary.textContent = explanation.summary || 'An error occurred';
+            
+            // Set why it happened
+            errorWhy.textContent = explanation.why_it_happened || 'Unknown reason';
+            
+            // Set fix steps
+            errorFixList.innerHTML = '';
+            const fixSteps = explanation.how_to_fix || ['Try reading the error message'];
+            fixSteps.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                errorFixList.appendChild(li);
+            });
+            
+            // Set confidence badge
+            const confidence = explanation.confidence || 0.5;
+            const percentage = Math.round(confidence * 100);
+            confidenceBadge.textContent = `${percentage}% confident`;
+            
+            errorSection.classList.remove('hidden');
+            runButton.disabled = false;
+        }
+
+        // Show generic error (network issues, etc.)
+        function showGenericError(message) {
+            hideAllResults();
+            errorSummary.textContent = 'Connection Error';
+            errorWhy.textContent = message;
+            errorFixList.innerHTML = `<li>Make sure the backend server is running</li><li>Check that the server is reachable at ${window.location.origin}</li>`;
+            confidenceBadge.textContent = '100% confident';
+            errorSection.classList.remove('hidden');
+            runButton.disabled = false;
+        }
+
+        // Run code function
+        async function runCode() {
+            const code = codeInput.value.trim();
+            const stdin = stdinInput.value;
+            const timeout = Number(timeoutInput.value) || 10;
+            
+            // Check if code is empty
+            if (!code) {
+                showGenericError('Please write some Python code first!');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Call the backend API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code, stdin, timeout })
+                });
+
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Check status and display appropriate result
+                if (data.status === 'success') {
+                    showSuccess(data.output);
+                } else if (data.status === 'error') {
+                    // Check if we have an explanation object
+                    if (data.explanation) {
+                        showError(data.explanation);
+                    } else {
+                        // Fallback if no explanation provided
+                        showError({
+                            summary: data.error || 'An error occurred',
+                            why_it_happened: 'Check the error message for details',
+                            how_to_fix: ['Review your code', 'Fix the issue and try again'],
+                            confidence: 0.5
+                        });
+                    }
+                } else {
+                    showGenericError('Unexpected response from server');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showGenericError(`Could not connect to server: ${error.message}`);
+            }
+        }
+
+        // Event listener for run button
+        runButton.addEventListener('click', runCode);
+
+        // Event listener for Ctrl+Enter or Cmd+Enter to run code
+        codeInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runCode();
+            }
+        });
+    </script>
+</body>
+</html>
