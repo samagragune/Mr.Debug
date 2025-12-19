@@ -1,6 +1,7 @@
 # Mr.Debug
 
 A web-based Python code execution service that provides intelligent error explanations for Python learners.
+(The project is heavily assisted by AI)
 
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
